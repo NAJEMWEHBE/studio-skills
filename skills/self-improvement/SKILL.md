@@ -1,6 +1,6 @@
 ---
 name: self-improvement
-description: Captures lessons, errors, and corrections during a Claude session, then promotes recurring patterns into persistent rules. Use whenever (1) the user corrects Claude, (2) a tool/command fails unexpectedly, (3) the user requests a missing capability, (4) Claude realizes its assumption was wrong, (5) a better approach is discovered for a recurring task. Also review existing lessons before starting any major task in the same domain.
+description: Captures lessons during a session and promotes recurring ones into persistent rules. Use when the user corrects Claude, a tool fails, an assumption was wrong, a capability is missing, or a better approach is found — and at session start to review existing lessons in the domain.
 ---
 
 # self-improvement
@@ -73,37 +73,11 @@ If a lesson could plausibly fit in two files, ask: *what's the primary signal?* 
 
 ## Lesson entry format
 
-Every entry — in any of the three files — uses this exact structure:
-
-```
-## [PREFIX-YYYYMMDD-XXX] category
-
-**Logged**: ISO-8601 timestamp (e.g. 2026-01-15T14:32:00Z)
-**Priority**: low | medium | high | critical
-**Status**: pending | active | promoted | archived
-**Area**: <domain tag, e.g. live-streaming, marketing>
-
-### Summary
-One-line description.
-
-### Details
-What happened. What was wrong. What is correct.
-
-### Suggested Action
-The specific fix or rule to apply going forward.
-
-### Metadata
-- Source: conversation | error | user_feedback
-- Pattern-Key: <stable identifier — see references/pattern-key-guide.md>
-- Recurrence-Count: 1
-- First-Seen: YYYY-MM-DD
-- Last-Seen: YYYY-MM-DD
-- See Also: <PREFIX-IDs of related entries, if any>
-```
+All entries — in all three files — share the same structure: a heading `## [PREFIX-YYYYMMDD-XXX] category`, then `Logged` / `Priority` / `Status` / `Area` fields, then `Summary` / `Details` / `Suggested Action` sections, then a `Metadata` block (`Source`, `Pattern-Key`, `Recurrence-Count`, `First-Seen`, `Last-Seen`, `See Also`).
 
 ID prefixes: `LRN-` for LEARNINGS, `ERR-` for ERRORS, `FR-` for FEATURE_REQUESTS.
 
-Worked examples are in `references/lesson-format.md`.
+Full schema, allowed `Status` values per file, and worked examples: `references/lesson-format.md`.
 
 ## Pattern-Key + recurrence rule
 
@@ -134,6 +108,16 @@ When promoting:
 3. Leave the entry in `.learnings/` for historical context — don't delete it.
 
 Decision tree: see `references/promotion-criteria.md`.
+
+## Conflict resolution
+
+When a newly proposed lesson contradicts an existing **promoted** rule (in the domain's `SKILL.md` or a sub-skill), don't silently log the new lesson. Surface the conflict.
+
+1. Tell the user: *"This contradicts `LRN-XXX`, which was promoted into `<file>`. Has the situation changed?"*
+2. If the old rule no longer applies → propose **demotion**: remove the rule from the domain skill, mark the original `.learnings/` entry `Status: archived`, and **log a new lesson explaining *why* it was demoted** so a future session doesn't re-promote it.
+3. If the new lesson is wrong or context-specific → reject it. The promoted rule stands.
+
+Full demotion process: `references/promotion-criteria.md`.
 
 ## Skill extraction trigger
 
@@ -200,6 +184,7 @@ If you find yourself thinking any of these things, **stop, draft the lesson prop
 | User asks for a capability you can't deliver | Propose a FEATURE_REQUESTS entry, get approval, log it |
 | Recurrence-Count hits 3 on an entry | Auto-flag for promotion review |
 | Promotion approved | Add rule to domain SKILL.md, mark entry `promoted` |
+| New lesson contradicts a promoted rule | Surface the conflict, propose demotion, log the *why* |
 | Lesson grows beyond ~200 words | Extract to its own sub-skill |
 | About to log without asking | Stop. Read the anti-rationalization table above. Ask. |
 
