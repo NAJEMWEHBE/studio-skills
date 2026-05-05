@@ -68,8 +68,8 @@ Strict separation. Same lesson does not go in two files.
 | File | What goes in it | Example trigger |
 |---|---|---|
 | `LEARNINGS.md` | Corrections, knowledge gaps, best practices, insights | User says *"actually it's cheaper to..."* |
-| `ERRORS.md` | Command, tool, or API failures with reproduction context | OBS connection drops at 7000 kbps |
-| `FEATURE_REQUESTS.md` | Capabilities the user wanted but Claude couldn't deliver | *"Can you sync OBS scenes from a CSV?"* — Claude can't yet |
+| `ERRORS.md` | Command, tool, or API failures with reproduction context | Export to H.264 fails at >4K resolution |
+| `FEATURE_REQUESTS.md` | Capabilities the user wanted but Claude couldn't deliver | *"Can you draft this in our brand voice from a style guide?"* — Claude can't yet |
 
 If a lesson could plausibly fit in two files, ask: *what's the primary signal?* Pick one. Cross-reference with `See Also` in the metadata.
 
@@ -149,7 +149,7 @@ To archive: set `Status: archived`. Leave the entry in place — it's history, d
 
 When a single lesson grows past ~200 words OR documents a complete multi-step workflow, *extract it into its own SKILL.md inside the same domain*. Example:
 
-- A lesson about *"OBS multi-bitrate fallback procedure"* with 8 steps → extract to `skills/live-streaming/sub-skills/obs-fallback-procedure/SKILL.md`.
+- A lesson about a *"campaign retro audit procedure"* with 8 steps → extract to `skills/marketing/sub-skills/campaign-retro/SKILL.md`.
 - The original `.learnings/` entry stays, with `Status: promoted` and `Promoted-To: <path>`.
 
 ## Edit-feedback loop
@@ -223,27 +223,27 @@ If you find yourself thinking any of these things, **stop, draft the lesson prop
 
 1. LEARNINGS proposal:
 
-   ## [LRN-20260115-001] streaming.bitrate.cap
+   ## [LRN-20260115-001] marketing.email.subject-line
    **Priority**: high
    **Status**: pending
    ### Summary
-   The active relay caps reliable bitrate at 3500 kbps.
+   Subject lines over 50 characters get truncated on mobile and underperform.
    [full draft]
    
    Accept / edit / reject?
 
 2. ERRORS proposal:
 
-   ## [ERR-20260115-002] obs.connection.timeout
+   ## [ERR-20260115-002] editing.export.color-shift
    **Priority**: medium
    **Status**: pending
    ### Summary
-   OBS connection dropped after 12 minutes at 6500 kbps.
+   Export to H.264 introduced a green shift versus the timeline preview.
    [full draft]
    
    Accept / edit / reject?"
 
-[User]: "Accept #1. Reject #2 — that was a one-off network blip, not a real pattern."
+[User]: "Accept #1. Reject #2 — that was a one-off codec quirk on this clip, not a real pattern."
 
 [Claude]: "Logged #1 to LEARNINGS.md. Skipped #2."
 ```
