@@ -1,6 +1,6 @@
 ---
 name: self-improvement
-description: Captures lessons, errors, and corrections during a Claude session, then promotes recurring patterns into persistent rules. Use whenever (1) the user corrects Claude, (2) a tool/command fails unexpectedly, (3) the user requests a missing capability, (4) Claude realizes its assumption was wrong, (5) a better approach is discovered for a recurring task. Also review existing lessons before starting any major task in the same domain.
+description: Captures lessons during a session and promotes recurring ones into persistent rules. Use when the user corrects Claude, a tool fails, an assumption was wrong, a capability is missing, or a better approach is found — and at session start to review existing lessons in the domain.
 ---
 
 # self-improvement
@@ -45,9 +45,11 @@ Work on whatever the task is. As you work, watch for any of the five trigger sig
 
 When you're about to repeat a logged mistake, **stop and flag it in real time**:
 
-> *"There's an existing lesson here — `LRN-20260101-003` says we shouldn't route Zoom through the bonded uplink. Should I do something different?"*
+> *"There's an existing lesson here — `LRN-20260101-003` warns against [the action you're about to take]. Should I do something different?"*
 
 This is the most valuable behavior in the system: catching the mistake **before** it happens, by referencing the lesson library you scanned in PREP.
+
+**Keep a running session log.** As trigger signals fire during DO, jot a one-line note in your working memory or a scratchpad — what happened, what was wrong, what was right. Don't draft full lesson entries yet (that's REFLECT). The log just ensures REFLECT has accurate material instead of relying on memory of a long session.
 
 ### REFLECT — at session end (or any natural breakpoint)
 
@@ -66,44 +68,29 @@ Strict separation. Same lesson does not go in two files.
 | File | What goes in it | Example trigger |
 |---|---|---|
 | `LEARNINGS.md` | Corrections, knowledge gaps, best practices, insights | User says *"actually it's cheaper to..."* |
-| `ERRORS.md` | Command, tool, or API failures with reproduction context | OBS connection drops at 7000 kbps |
-| `FEATURE_REQUESTS.md` | Capabilities the user wanted but Claude couldn't deliver | *"Can you sync OBS scenes from a CSV?"* — Claude can't yet |
+| `ERRORS.md` | Command, tool, or API failures with reproduction context | Export to H.264 fails at >4K resolution |
+| `FEATURE_REQUESTS.md` | Capabilities the user wanted but Claude couldn't deliver | *"Can you draft this in our brand voice from a style guide?"* — Claude can't yet |
 
 If a lesson could plausibly fit in two files, ask: *what's the primary signal?* Pick one. Cross-reference with `See Also` in the metadata.
 
+## Cross-domain lessons
+
+Some lessons apply to more than one domain (e.g., a sanitization rule that's true for both live-streaming and marketing). Don't duplicate the entry across domain folders.
+
+- **Pick the most-relevant domain as the home.** Store the entry once, in `skills/<primary>/.learnings/`.
+- **Tag all applicable domains in `Area`.** Comma-separated: `Area: live-streaming, marketing`.
+- During PREP for any tagged domain, search across `.learnings/` files for entries whose `Area` includes the current domain — not just the current domain's folder.
+- **If a lesson is truly universal** (applies to the system itself or every domain), home it in `skills/self-improvement/.learnings/` instead.
+
 ## Lesson entry format
 
-Every entry — in any of the three files — uses this exact structure:
-
-```
-## [PREFIX-YYYYMMDD-XXX] category
-
-**Logged**: ISO-8601 timestamp (e.g. 2026-01-15T14:32:00Z)
-**Priority**: low | medium | high | critical
-**Status**: pending | active | promoted | archived
-**Area**: <domain tag, e.g. live-streaming, marketing>
-
-### Summary
-One-line description.
-
-### Details
-What happened. What was wrong. What is correct.
-
-### Suggested Action
-The specific fix or rule to apply going forward.
-
-### Metadata
-- Source: conversation | error | user_feedback
-- Pattern-Key: <stable identifier — see references/pattern-key-guide.md>
-- Recurrence-Count: 1
-- First-Seen: YYYY-MM-DD
-- Last-Seen: YYYY-MM-DD
-- See Also: <PREFIX-IDs of related entries, if any>
-```
+All entries — in all three files — share the same structure: a heading `## [PREFIX-YYYYMMDD-XXX] category`, then `Logged` / `Priority` / `Status` / `Area` fields, then `Summary` / `Details` / `Suggested Action` sections, then a `Metadata` block (`Source`, `Pattern-Key`, `Recurrence-Count`, `First-Seen`, `Last-Seen`, `See Also`).
 
 ID prefixes: `LRN-` for LEARNINGS, `ERR-` for ERRORS, `FR-` for FEATURE_REQUESTS.
 
-Worked examples are in `references/lesson-format.md`.
+**ID collisions on merge.** If two sessions independently produce the same `PREFIX-YYYYMMDD-XXX` ID and the files later get merged, bump the second entry to the next free sequence number and update any `See Also` references that pointed to it.
+
+Full schema, allowed `Status` values per file, and worked examples: `references/lesson-format.md`.
 
 ## Pattern-Key + recurrence rule
 
@@ -135,11 +122,34 @@ When promoting:
 
 Decision tree: see `references/promotion-criteria.md`.
 
+## Conflict resolution
+
+When a newly proposed lesson contradicts an existing **promoted** rule (in the domain's `SKILL.md` or a sub-skill), don't silently log the new lesson. Surface the conflict.
+
+1. Tell the user: *"This contradicts `LRN-XXX`, which was promoted into `<file>`. Has the situation changed?"*
+2. If the old rule no longer applies → propose **demotion**: remove the rule from the domain skill, mark the original `.learnings/` entry `Status: archived`, and **log a new lesson explaining *why* it was demoted** so a future session doesn't re-promote it.
+3. If the new lesson is wrong or context-specific → reject it. The promoted rule stands.
+
+Full demotion process: `references/promotion-criteria.md`.
+
+## Archival
+
+Lessons don't expire automatically — but stale entries clutter the library. During PREP, if you spot an `active` lesson whose context no longer applies, propose archival.
+
+Triggers for archival:
+
+- The tool, service, or workflow the lesson references no longer exists.
+- A newer lesson supersedes it (in which case the new lesson should `See Also` the old one).
+- The underlying situation has changed materially (vendor swap, hardware change, policy change), and the user confirms the rule no longer holds.
+- `Last-Seen` is >12 months old AND the user, when prompted, agrees the lesson is no longer relevant.
+
+To archive: set `Status: archived`. Leave the entry in place — it's history, don't delete it. If the lesson is `promoted` (the rule lives in a domain `SKILL.md`), archival also requires demotion — see Conflict resolution above.
+
 ## Skill extraction trigger
 
 When a single lesson grows past ~200 words OR documents a complete multi-step workflow, *extract it into its own SKILL.md inside the same domain*. Example:
 
-- A lesson about *"OBS multi-bitrate fallback procedure"* with 8 steps → extract to `skills/live-streaming/sub-skills/obs-fallback-procedure/SKILL.md`.
+- A lesson about a *"campaign retro audit procedure"* with 8 steps → extract to `skills/marketing/sub-skills/campaign-retro/SKILL.md`.
 - The original `.learnings/` entry stays, with `Status: promoted` and `Promoted-To: <path>`.
 
 ## Edit-feedback loop
@@ -200,6 +210,9 @@ If you find yourself thinking any of these things, **stop, draft the lesson prop
 | User asks for a capability you can't deliver | Propose a FEATURE_REQUESTS entry, get approval, log it |
 | Recurrence-Count hits 3 on an entry | Auto-flag for promotion review |
 | Promotion approved | Add rule to domain SKILL.md, mark entry `promoted` |
+| New lesson contradicts a promoted rule | Surface the conflict, propose demotion, log the *why* |
+| Lesson applies to multiple domains | Store once under primary; tag all in `Area:`; search across folders during PREP |
+| Active lesson is stale or no longer applies | Propose archival; if promoted, also demote |
 | Lesson grows beyond ~200 words | Extract to its own sub-skill |
 | About to log without asking | Stop. Read the anti-rationalization table above. Ask. |
 
@@ -210,27 +223,27 @@ If you find yourself thinking any of these things, **stop, draft the lesson prop
 
 1. LEARNINGS proposal:
 
-   ## [LRN-20260115-001] streaming.bitrate.cap
+   ## [LRN-20260115-001] marketing.email.subject-line
    **Priority**: high
    **Status**: pending
    ### Summary
-   The active relay caps reliable bitrate at 3500 kbps.
+   Subject lines over 50 characters get truncated on mobile and underperform.
    [full draft]
    
    Accept / edit / reject?
 
 2. ERRORS proposal:
 
-   ## [ERR-20260115-002] obs.connection.timeout
+   ## [ERR-20260115-002] editing.export.color-shift
    **Priority**: medium
    **Status**: pending
    ### Summary
-   OBS connection dropped after 12 minutes at 6500 kbps.
+   Export to H.264 introduced a green shift versus the timeline preview.
    [full draft]
    
    Accept / edit / reject?"
 
-[User]: "Accept #1. Reject #2 — that was a one-off network blip, not a real pattern."
+[User]: "Accept #1. Reject #2 — that was a one-off codec quirk on this clip, not a real pattern."
 
 [Claude]: "Logged #1 to LEARNINGS.md. Skipped #2."
 ```
