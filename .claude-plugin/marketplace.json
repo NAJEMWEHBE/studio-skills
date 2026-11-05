@@ -1,0 +1,15 @@
+{
+  "name": "studio-skills",
+  "description": "Najem Wehbe's studio skills: a lesson log for repeated work, with a live-streaming example domain.",
+  "owner": {
+    "name": "Najem Wehbe",
+    "url": "https://github.com/NAJEMWEHBE"
+  },
+  "plugins": [
+    {
+      "name": "studio-skills",
+      "source": "./",
+      "description": "A lesson log for work you repeat, with a live-streaming example domain."
+    }
+  ]
+}
