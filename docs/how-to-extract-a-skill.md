@@ -1,112 +1,36 @@
-# How to extract a sub-skill
+# Extracting a lesson into a skill
 
-Sometimes a single lesson grows into a whole workflow that's too big to live as a paragraph in a domain `SKILL.md`. When that happens, *extract* it into its own sub-skill.
+When a lesson grows into a whole workflow, it outgrows a line in `RULES.md`. The `self-improvement` skill then proposes extracting it into a skill of its own; the rules for that live in `skills/self-improvement/references/lesson-lifecycle.md`. This page is the human side.
 
-## When to extract
+## When
 
-Extract a lesson into a sub-skill when **any** of these is true:
+Extract when the lesson runs past about 200 words, is a multi-step workflow, or has its own checklist or decision tree. If you can say it in two or three sentences, promote it to `RULES.md` instead: too many tiny skills are hard to keep track of.
 
-- The lesson has grown beyond ~200 words.
-- The lesson documents a multi-step workflow with 5+ steps.
-- The lesson has its own checklist, sub-rules, or decision tree.
-- Multiple other lessons reference it as background.
+## Where it goes
 
-If the lesson is shorter than that, just **promote** it as a paragraph or bullet inside the domain's `SKILL.md`. Don't extract small lessons — you'll end up with too many tiny files.
+- **Claude Code:** `.claude/skills/<name>/SKILL.md` in the project, where Claude Code loads it automatically. To share it, copy it into your fork's `skills/` folder.
+- **claude.ai:** Claude prints the `SKILL.md`. Save it in a folder named after the skill, zip the folder, and upload it under Settings → Capabilities → Skills (labels not confirmed; see `how-to-use-in-claude-ai.md`).
 
-## How to extract
+Name it like a domain: lowercase and hyphenated, such as `obs-fallback-procedure`.
 
-### Step 1 — Confirm the trigger
-
-Re-read the lesson. If you can summarize it in 2-3 sentences without losing meaning, *don't extract* — promote as a paragraph instead. Extraction is for content that genuinely doesn't fit.
-
-### Step 2 — Pick a sub-skill name
-
-The sub-skill folder should sit under the domain's `sub-skills/` folder:
-
-```
-skills/<domain>/sub-skills/<sub-skill-name>/
-```
-
-Naming follows the same rules as a domain skill: lowercase, hyphenated, descriptive.
-
-Example: an OBS multi-bitrate fallback procedure under live-streaming becomes:
-
-```
-skills/live-streaming/sub-skills/obs-fallback-procedure/SKILL.md
-```
-
-### Step 3 — Create the sub-skill folder and SKILL.md
-
-Inside the new sub-skill folder, create a `SKILL.md` with frontmatter:
+## What the skill needs
 
 ```yaml
 ---
-name: <sub-skill-name>
-description: <one-or-two-sentence description, third person, with "Use when..." trigger>
+name: obs-fallback-procedure
+description: Switching a live OBS stream to the fallback relay. Use when the primary relay fails mid-stream or before a planned relay change.
 ---
 ```
 
-The body should be the workflow content from the original lesson, expanded with whatever context, examples, and sub-rules are needed.
+The body is the workflow from the lesson, as numbered steps with a clear done-state.
 
-### Step 4 — Update the parent skill's SKILL.md
+## What changes in the lesson files
 
-Open the domain's `SKILL.md` (e.g. `skills/live-streaming/SKILL.md`) and add a reference to the new sub-skill in the appropriate section:
+Claude proposes, and writes after you accept:
 
-```
-For OBS multi-bitrate fallback during a stream, see `sub-skills/obs-fallback-procedure/SKILL.md`.
-```
+- the original entry gets `Status: promoted` and `Promoted-To: obs-fallback-procedure`;
+- `RULES.md` gets a one-line pointer: *"For a relay failure mid-stream, use the `obs-fallback-procedure` skill. (LRN-20260201-007)"*
 
-### Step 5 — Mark the original lesson as promoted
+## Undoing it
 
-Open the lesson in `.learnings/LEARNINGS.md` and:
-
-1. Change `Status: active` to `Status: promoted`.
-2. Add a new metadata field: `Promoted-To: skills/<domain>/sub-skills/<sub-skill-name>/SKILL.md`
-3. Leave the lesson entry in `.learnings/` for historical context — don't delete it.
-
-Example:
-
-```
-## [LRN-20260201-007] obs.fallback.multi-bitrate
-
-**Logged**: 2026-02-01T15:00:00Z
-**Priority**: high
-**Status**: promoted
-...
-
-### Metadata
-- Source: conversation
-- Pattern-Key: obs.fallback.multi-bitrate
-- Recurrence-Count: 4
-- First-Seen: 2025-11-12
-- Last-Seen: 2026-02-01
-- Promoted-To: skills/live-streaming/sub-skills/obs-fallback-procedure/SKILL.md
-- See Also: LRN-20260101-001, LRN-20260101-004
-```
-
-### Step 6 — Test it
-
-Open a claude.ai Project with the domain skill (and now its sub-skills) uploaded as Project knowledge. In a real session, verify Claude:
-
-- Knows the parent SKILL.md mentions the sub-skill.
-- Reads the sub-skill when the trigger condition fires.
-- References the sub-skill by file path when applying its rules.
-
-If Claude doesn't naturally reach for the sub-skill, the description in the sub-skill's frontmatter is too vague. Tighten the trigger conditions.
-
-## What NOT to do
-
-- **Don't extract every multi-step lesson.** Some workflows are best kept compact in the parent SKILL.md.
-- **Don't leave the original lesson without `Status: promoted`.** It will keep getting matched on Pattern-Key and the system will think the rule is still un-promoted.
-- **Don't forget to reference the sub-skill from the parent SKILL.md.** An orphaned sub-skill is one Claude won't find.
-- **Don't extract a lesson into a sub-skill in someone else's domain.** Sub-skills live inside their domain's folder. If a workflow truly applies to multiple domains, it's a candidate for the meta-skill area, not a domain-specific sub-skill.
-
-## When to undo an extraction
-
-If a sub-skill turns out to be unused or wrong:
-
-1. Move its useful content back into the parent SKILL.md (or delete it).
-2. Update the original lesson's `Status` from `promoted` back to `active`, or to `archived` if the rule turned out to be wrong.
-3. Log a new lesson explaining *why* it was demoted — that's itself a learning.
-
-This rarely happens, but it's allowed.
+If the skill turns out unused or wrong, ask Claude to demote it: the pointer leaves `RULES.md`, the entry is archived, and a new lesson records why, so it isn't extracted again.
