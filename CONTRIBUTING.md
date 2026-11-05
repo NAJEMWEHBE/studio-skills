@@ -1,27 +1,21 @@
 # Contributing to studio-skills
 
-This project grows through real-world usage in media production work. All contributions are welcome — bug reports, new domain skills, lesson templates, doc improvements.
+Bug reports, new domain skills, lesson examples and doc fixes are all welcome.
 
-## How to add a new domain skill
+## A new domain skill
 
-A "domain skill" covers a specific area of work (live streaming, virtual studios, podcast production, wedding photography, etc.).
+1. Follow [`docs/how-to-add-a-new-domain.md`](docs/how-to-add-a-new-domain.md).
+2. Add 2 or 3 eval cases for it under `evals/` (copy an existing case).
+3. Open a pull request saying what the domain is and why you built it. CI checks the frontmatter and links.
 
-1. Read [`docs/how-to-add-a-new-domain.md`](docs/how-to-add-a-new-domain.md) for the full walkthrough.
-2. Use the `live-streaming` skill folder as your template — copy the structure and frontmatter.
-3. Write your `SKILL.md` body covering: when to use the skill, what steps to take, what good output looks like.
-4. Bootstrap empty `.learnings/` files using the templates in `skills/self-improvement/templates/`.
-5. Open a pull request with a short description of the domain and why you built the skill.
+## An example lesson
 
-## How to submit a lesson template
+1. Write it in the format in `skills/self-improvement/references/lesson-format.md`.
+2. Use placeholders for every client, person, address and secret: `[CLIENT]`, `[CONTACT]`, `[SERVER_IP]`, `[CREDENTIAL]`.
+3. Open a pull request adding it to the domain's file under `examples/.learnings/`.
 
-If you've found a recurring pattern in your domain that others would benefit from:
+## Conduct
 
-1. Format the lesson using the entry format in `skills/self-improvement/references/lesson-format.md`.
-2. **Sanitize all secrets, IPs, client names, and personal info** — use placeholders like `[CLIENT]`, `[CREDENTIAL]`, `[SERVER_IP]`.
-3. Open a pull request adding the lesson to the relevant domain's `.learnings/LEARNINGS.md`.
-
-## Code of conduct
-
-- **Be useful, be honest.** Contributions should reflect real work, not theory.
-- **Sanitize before you push.** Never commit credentials, client names, real IPs, or personal contact info.
-- **Disagreement is fine, condescension is not.** Critique ideas, not people.
+- **Be useful and honest:** contributions should come from real work.
+- **Sanitize before you push** (see [`PUBLISHING.md`](PUBLISHING.md)).
+- **Critique ideas, not people.**
