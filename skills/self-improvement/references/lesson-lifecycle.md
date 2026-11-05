@@ -28,7 +28,7 @@ The entry stays in its file as history either way. `RULES.md` belongs to the use
 When a new note contradicts a rule in `RULES.md` or an extracted skill:
 
 1. Tell the user: *"This contradicts LRN-XXX, promoted to RULES.md. Has the situation changed?"*
-2. The situation changed: propose demotion. Remove the rule (or the extracted skill's pointer in `RULES.md`), set the original entry to `Status: archived`, and draft a new lesson saying why it was demoted, so a later session does not promote it again.
+2. The situation changed: propose demotion. Remove the rule (or the extracted skill's pointer in `RULES.md`, asking whether to delete the skill too), set the original entry to `Status: archived`, and draft a new lesson saying why it was demoted, so a later session does not promote it again.
 3. The new note is wrong or a one-off: drop it. The rule stands.
 
 ## Archival
