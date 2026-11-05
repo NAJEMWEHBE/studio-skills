@@ -1,5 +1,5 @@
 # Private working files — never commit these
-.learnings/private/
+**/.learnings/private/
 *.local.md
 secrets/
 *.env
