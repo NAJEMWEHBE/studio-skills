@@ -1,0 +1,22 @@
+name: Release skill zips
+
+# Runs only when a version tag is pushed (for example v0.2.0): attaches one zip per
+# skill to the GitHub release, for claude.ai users to upload.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build skill zips
+        run: bash scripts/build-zips.sh dist
+      - name: Create the release with the zips
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.zip --title "$GITHUB_REF_NAME" --generate-notes

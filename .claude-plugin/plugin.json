@@ -1,0 +1,10 @@
+{
+  "name": "studio-skills",
+  "description": "A lesson log for work you repeat: Claude drafts lessons from corrections and failures, you approve each one, and recurring lessons become rules. Ships with a live-streaming example domain.",
+  "version": "0.2.0",
+  "author": { "name": "Najem Wehbe", "url": "https://github.com/NAJEMWEHBE" },
+  "license": "MIT",
+  "homepage": "https://github.com/NAJEMWEHBE/studio-skills",
+  "repository": "https://github.com/NAJEMWEHBE/studio-skills",
+  "keywords": ["skills", "lessons", "self-improvement", "live-streaming", "obs", "srt"]
+}

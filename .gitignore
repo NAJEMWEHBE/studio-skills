@@ -1,5 +1,5 @@
 # Private working files — never commit these
-.learnings/private/
+**/.learnings/private/
 *.local.md
 secrets/
 *.env
@@ -35,3 +35,6 @@ desktop.ini
 # Logs
 *.log
 npm-debug.log*
+
+# Build output
+dist/

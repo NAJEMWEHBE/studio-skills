@@ -1,25 +1,25 @@
 # Lesson entry format
 
-This is the canonical format for entries in any of the three lesson files (`LEARNINGS.md`, `ERRORS.md`, `FEATURE_REQUESTS.md`).
+The format for entries in `LEARNINGS.md`, `ERRORS.md` and `FEATURE_REQUESTS.md`. Rules in `RULES.md` use the shorter format at the end of this file.
 
 ## The format
 
 ```
-## [PREFIX-YYYYMMDD-XXX] category
+## [PREFIX-YYYYMMDD-XXX] <pattern-key>
 
 **Logged**: ISO-8601 timestamp
 **Priority**: low | medium | high | critical
-**Status**: pending | active | promoted | archived | resolved | wont_fix | implemented
-**Area**: <domain tag>
+**Status**: active (see the allowed values per file below)
+**Area**: <domain>[, <other domain>...]
 
 ### Summary
-One-line description. Should fit on one line.
+One line.
 
 ### Details
-What happened. What was wrong. What is correct. Include enough context that someone reading this 6 months from now can understand it without remembering the original session.
+What happened, what was wrong, what is correct. Enough context that someone reading it six months from now understands it without the original session.
 
 ### Suggested Action
-The specific fix or rule to apply going forward. Should be concrete and testable — not "be careful with X" but "always set Y to Z when A."
+The concrete, testable rule: not "be careful with X" but "always set Y to Z when A".
 
 ### Metadata
 - Source: conversation | error | user_feedback
@@ -30,47 +30,43 @@ The specific fix or rule to apply going forward. Should be concrete and testable
 - See Also: <related entry IDs>
 ```
 
-## ID prefixes
+The heading repeats the Pattern-Key, so a reader scanning headings sees what each entry is about. `Area` lists every domain the lesson applies to; the entry lives once, in the first domain's folder. `Source: user_feedback` marks lessons drawn from the user's edits to your output.
 
-| Prefix | File | Meaning |
+## IDs
+
+`PREFIX-YYYYMMDD-XXX`: the prefix names the file, `YYYYMMDD` is the date logged, `XXX` is a zero-padded sequence number for that day in that file (`001`, `002`, ...).
+
+| Prefix | File | Holds |
 |---|---|---|
-| `LRN-` | `LEARNINGS.md` | Learning / correction / insight |
-| `ERR-` | `ERRORS.md` | Error / failure / crash |
-| `FR-` | `FEATURE_REQUESTS.md` | Feature request / capability gap |
-
-## ID format
-
-`PREFIX-YYYYMMDD-XXX` where:
-
-- `YYYYMMDD` is the date logged (no separators)
-- `XXX` is a zero-padded sequence number (`001`, `002`, ..., `099`, `100`, ...)
+| `LRN-` | `LEARNINGS.md` | Corrections, knowledge gaps, best practices |
+| `ERR-` | `ERRORS.md` | Command, tool or API failures, with reproduction steps |
+| `FR-` | `FEATURE_REQUESTS.md` | Capabilities the user wanted that Claude couldn't deliver |
 
 Example: `LRN-20260115-001` is the first learning logged on 2026-01-15.
 
+**Collisions on merge.** If two copies of a file each gained the same ID and are later merged, give the second entry the next free sequence number and update every `See Also` that pointed to it.
+
 ## Status values
 
-The legal `Status` values vary by file:
+A draft is shown with `Status: active`; it reaches the file only after the user accepts it, so no entry on disk waits for approval.
 
-| File | Allowed Status values |
+| File | Allowed values |
 |---|---|
-| LEARNINGS | `pending`, `active`, `promoted`, `archived` |
-| ERRORS | `pending`, `active`, `resolved`, `wont_fix`, `archived` |
-| FEATURE_REQUESTS | `pending`, `active`, `implemented`, `wont_fix`, `archived` |
+| LEARNINGS | `active`, `promoted`, `archived` |
+| ERRORS | `active`, `resolved`, `wont_fix`, `archived` |
+| FEATURE_REQUESTS | `active`, `implemented`, `wont_fix`, `archived` |
 
-Meanings:
+- `active`: approved and in force.
+- `promoted`: became a rule in `RULES.md` or a workflow skill; the entry carries `Promoted-To: <file>` (LEARNINGS only).
+- `resolved`: the underlying error is fixed (ERRORS only).
+- `implemented`: the capability now exists (FEATURE_REQUESTS only).
+- `wont_fix`: the user decided not to act on it.
+- `archived`: no longer applies, kept as history.
 
-- `pending` — drafted, not yet user-approved (rare, only briefly during proposal).
-- `active` — approved, in force.
-- `promoted` — absorbed into the domain `SKILL.md` (LEARNINGS only).
-- `resolved` — the underlying error is fixed (ERRORS only).
-- `implemented` — the feature now exists (FEATURE_REQUESTS only).
-- `wont_fix` — decided not to act on it.
-- `archived` — no longer relevant, kept for history.
-
-## Worked example 1 — LEARNINGS
+## Worked example: LEARNINGS
 
 ```
-## [LRN-20260115-001] streaming.bitrate.cap
+## [LRN-20260115-001] live-streaming.bitrate.cap
 
 **Logged**: 2026-01-15T14:32:00Z
 **Priority**: high
@@ -78,27 +74,27 @@ Meanings:
 **Area**: live-streaming
 
 ### Summary
-The active relay's reliable bitrate ceiling is around 3500-5000 kbps due to upstream jitter; default to 3500 CBR.
+The primary relay's reliable bitrate ceiling is about 3500 kbps; default to 3500 CBR.
 
 ### Details
-During a [CLIENT] event on 2026-01-15, OBS was set to 6500 kbps CBR. Frame drops appeared within the first 4 minutes, escalating to a full disconnect at minute 12. Lowered to 3500 kbps and the stream stabilized for the remaining 90 minutes. This pattern has been observed on three prior events.
+During a [CLIENT] event on 2026-01-15, OBS was set to 6500 kbps CBR. Dropped frames appeared within 4 minutes and the stream disconnected at minute 12. At 3500 kbps it stayed stable for the remaining 90 minutes. The same happened at three earlier events.
 
 ### Suggested Action
-For any stream routed through the active relay, set OBS to 3500 kbps CBR by default. Only test higher rates in controlled conditions, never live.
+For any stream through the primary relay, set OBS to 3500 kbps CBR. Test higher rates only on a trial stream, never live.
 
 ### Metadata
 - Source: conversation
-- Pattern-Key: streaming.bitrate.cap
+- Pattern-Key: live-streaming.bitrate.cap
 - Recurrence-Count: 4
 - First-Seen: 2025-09-12
 - Last-Seen: 2026-01-15
 - See Also: LRN-20251004-002
 ```
 
-## Worked example 2 — ERRORS
+## Worked example: ERRORS
 
 ```
-## [ERR-20260118-003] aximmetry.preview.render-target
+## [ERR-20260118-003] virtual-studios.aximmetry.preview-render-target
 
 **Logged**: 2026-01-18T11:05:00Z
 **Priority**: medium
@@ -106,27 +102,34 @@ For any stream routed through the active relay, set OBS to 3500 kbps CBR by defa
 **Area**: virtual-studios
 
 ### Summary
-Aximmetry scene preview window goes black when switching to a UE5 input source.
+The Aximmetry scene preview goes black when switching to a UE5 input source.
 
 ### Details
-Reproduction: open Aximmetry, load scene with UE5 source, press Tab to switch preview. Preview goes black for ~2 seconds, then shows last frame. Logs show: `Render target unbound: source_id=42`. Happens on every switch.
+Reproduction: open Aximmetry, load a scene with a UE5 source, press Tab to switch the preview. The preview goes black for about 2 seconds, then shows the last frame. The log shows `Render target unbound: source_id=42`. Happens on every switch.
 
 ### Suggested Action
-Investigate render target binding lifecycle. Workaround for now: pre-warm preview by switching to UE5 source once at scene load, then back to default.
+Workaround: switch to the UE5 source once at scene load, then back to the default. Investigate the render-target binding.
 
 ### Metadata
 - Source: error
-- Pattern-Key: aximmetry.preview.render-target
+- Pattern-Key: virtual-studios.aximmetry.preview-render-target
 - Recurrence-Count: 2
 - First-Seen: 2026-01-10
 - Last-Seen: 2026-01-18
 - See Also:
 ```
 
-## Notes on writing good lessons
+## Rule format (RULES.md)
 
-- **Be specific.** "Don't use high bitrate" is bad. "Cap the active relay at 3500 kbps CBR" is good.
-- **Include the *why* when it's not obvious.** Future-you might not remember the reasoning.
-- **Sanitize.** No client names, no real IPs, no credentials. Use `[CLIENT]`, `[SERVER_IP]`, `[CREDENTIAL]`.
-- **One lesson per entry.** If you find yourself writing about two unrelated things, split into two entries.
-- **Cross-reference with `See Also`.** When a new lesson is related to an old one, link them. Future-you will thank you.
+One rule per bullet, with the lesson it came from:
+
+```
+- Set OBS to 3500 kbps CBR for streams through the primary relay; test higher rates only on a trial stream. (LRN-20260115-001)
+```
+
+## Writing good lessons
+
+- **Specific:** "Cap the primary relay at 3500 kbps CBR", not "don't use a high bitrate".
+- **The why**, when it isn't obvious.
+- **Placeholders** for every client, person, address, hostname and secret: `[CLIENT]`, `[SERVER_IP]`, `[HOSTNAME]`, `[CREDENTIAL]`, `[CONTACT]`.
+- **One lesson per entry.** Two unrelated points make two entries, linked with `See Also` if related.

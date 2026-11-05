@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Frontmatter, tracked private notes, relative markdown links.
+      - name: Repo checks
+        run: node scripts/check.mjs
+
+      # The skill zips users upload to claude.ai; built here so a broken layout fails early.
+      - name: Build skill zips
+        run: |
+          bash scripts/build-zips.sh dist
+          for z in dist/*.zip; do
+            s=$(basename "$z" .zip)
+            unzip -l "$z" | grep -q " $s/SKILL.md$" || { echo "$z has no $s/SKILL.md"; exit 1; }
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skill-zips
+          path: dist/*.zip
+
+      # Runs without signing in (checked on this repo's first CI run).
+      - name: Plugin validate
+        run: npx --yes @anthropic-ai/claude-code plugin validate . --strict

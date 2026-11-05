@@ -1,6 +1,6 @@
-# Server routing — relay architecture (example)
+# Server routing: relay architecture (example)
 
-Conceptual map of how live streams flow from camera to viewer. **This is an example architecture** — adapt to your specific setup. No real endpoints in this file — those live in `.learnings/private/` (gitignored).
+How a stream flows from camera to viewer, and how to measure the relay's bitrate cap. Real endpoints live only in the project's `.learnings/private/` notes.
 
 ## The path
 
@@ -8,54 +8,43 @@ Conceptual map of how live streams flow from camera to viewer. **This is an exam
 [Camera] → [Capture device] → [OBS] → [Bonding router] → [Bonded uplink] → [Relay] → [CDN] → [Viewer]
 ```
 
-Each link can fail. Most failures cluster at the bonded-uplink and relay stages.
+Most failures cluster at the bonded uplink and the relay.
 
-## Relay architecture
+## Two relays
 
-The relay is a server (often cloud-hosted) that:
+The relay is a server, often cloud-hosted, that receives the bonded stream over SRT or RTMP, buffers short hiccups so the CDN never sees them, and forwards the stream to one or more CDN endpoints (Vimeo, YouTube, a custom RTMP target).
 
-- Accepts the bonded stream from the bonding router
-- Re-broadcasts it to one or more CDN endpoints (Vimeo, YouTube, custom RTMP)
-- Buffers brief connection hiccups so the CDN never sees them
+Keep two: a **primary** for the event and a **fallback**, in a different region where possible. If the primary fails, switch the OBS server URL to the fallback in seconds; you can also test on the fallback while the primary is live.
 
-Two relays are typically configured:
+## Measuring the reliable bitrate cap
 
-- **Primary:** the active relay for current operations
-- **Fallback:** a backup, geographically distant from primary if possible
+The reliable cap is the highest bitrate the path sustains without drops. It depends on the bonded uplink at that venue and the route to the relay, so measure it per venue and relay:
 
-## Why two relays exist
+1. Start a trial stream to the relay (not to the public CDN event) at a bitrate you know is safe, such as 2000 kbps.
+2. Every 5 minutes, raise the bitrate by 500 kbps.
+3. Stop when OBS's dropped frames pass 0.5% over a 5-minute step. The last step below that is the ceiling.
+4. Set the stream to 80% of the ceiling; that is the reliable cap.
+5. Record it as a lesson (Pattern-Key `live-streaming.bitrate.cap`), with the venue, the relay and the uplink mix as placeholders.
 
-A single point of failure in a live stream is unacceptable. With two relays:
+The step size, threshold and 80% margin are a starting method, not measured values: tighten them as lessons accumulate.
 
-- If primary fails, you can switch to fallback in seconds (just change the OBS server URL)
-- You can run a test stream on fallback while a live stream runs on primary
-- Geographic distribution reduces single-region cloud outages
+## Latency
 
-## Reliable bitrate cap
+- OBS to bonding router: under 50 ms
+- Bonding router to relay: 100 to 300 ms, depending on the uplink mix; SRT adds its configured latency on top
+- Relay to CDN: 100 to 500 ms
+- CDN to viewer: 5 to 30 seconds, set mostly by the CDN's buffering
 
-Each relay has a *reliable bitrate cap* — the highest bitrate it can sustain without jitter or drops. This is determined by the relay's outbound bandwidth and the network between you and it. Test it. Document the result in `.learnings/`.
-
-## Latency characteristics
-
-- OBS → bonding router: <50 ms
-- Bonding router bonded → Relay: 100-300 ms depending on uplink mix
-- Relay → CDN: 100-500 ms depending on CDN
-- CDN → Viewer: variable, typically 5-30 seconds depending on CDN buffering
-
-Total glass-to-glass latency: typically 10-30 seconds.
+Glass to glass, expect 10 to 30 seconds. These are typical ranges, not measurements of this setup.
 
 ## Failure modes by stage
 
 | Stage | Common failure | Detection signal |
 |---|---|---|
-| Capture device | USB/cable disconnects | OBS shows "no signal" on that source |
-| OBS | Encoder overload | OBS log: "encoder lagging" |
-| Bonding router | Uplink degradation | Router dashboard signal indicator |
+| Capture device | USB or cable disconnect | OBS shows no signal on that source |
+| OBS | Encoder overload | OBS status bar or log: encoding overloaded |
+| Bonding router | Uplink degradation | Router dashboard |
 | Bonded uplink | Throughput collapse | OBS dropped frames spike |
-| Relay | Connection refused | OBS "stream disconnected" with timeout |
-| CDN | Ingest failure | CDN dashboard or external monitor |
-| Viewer | Geo-block / rating | Viewer reports; no error in OBS or CDN |
-
-## Where the actual endpoints live
-
-Real server URLs, ports, credentials, and stream keys are stored in `.learnings/private/server-endpoints.local.md` (gitignored). Never in this file.
+| Relay | Connection refused | OBS reports the stream disconnected |
+| CDN | Ingest failure | CDN dashboard or an external monitor |
+| Viewer | Privacy, geo-restriction or age setting | Viewer reports; no error in OBS or the CDN |

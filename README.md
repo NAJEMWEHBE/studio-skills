@@ -3,90 +3,74 @@
 ![Status: experimental](https://img.shields.io/badge/status-experimental-orange)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
-A self-improving collection of skills for **any kind of work you do more than once**. The learning engine is generic — the same engine drives every skill, regardless of subject. Marketing campaigns, video editing, filming, live streaming, problem-solving, building things — anything that has its own rules and recurring lessons.
+A lesson log for work you repeat. When you correct Claude, a command fails or an assumption proves wrong, Claude drafts a lesson; you accept, edit or reject it; and lessons that keep recurring become rules Claude reads before the next session in that area of work. It works for Claude Code and claude.ai, and ships with a live-streaming example domain.
 
-Built for solo operators, small teams, and anyone who uses [claude.ai](https://claude.ai) as their working tool. No CLI, no terminal, no developer setup required.
+## What it looks like
 
-## Why this exists
+An illustrative exchange (not a recorded session), at the start and end of a session in the `live-streaming` domain:
 
-Every project teaches you something. Every mistake reveals a rule you should have followed. Most of those lessons get forgotten the next day — buried in chat history, scattered across notebooks, lost when you switch tools.
+```
+Claude: Before we start: RULES.md says 3500 kbps CBR through the primary relay
+        (LRN-20260115-001), and ERR-20260120-002 warns that OBS gives up
+        reconnecting after about 5 minutes. Both bear on Friday's stream.
 
-This repository captures lessons in real time, stores them next to the work they apply to, and turns the recurring ones into permanent rules that future-you (and future-Claude) follow automatically.
+        ... the work ...
 
-The loop:
+Claude: Before we wrap, one draft:
+        ## [LRN-20260203-001] live-streaming.uplink.carrier-a-2g
+        **Priority**: high
+        **Status**: active
+        ### Summary
+        Carrier A's SIMs fall back to 2G at [VENUE]; disable them there before the show.
+        [rest of the draft]
+        Accept / edit / reject?
 
-1. **Learn** — when something goes wrong (or right) during a session, write it down.
-2. **Adapt** — once a lesson keeps showing up, promote it from the temporary log into the main skill so you never have to learn it twice.
-3. **Evolve** — as your work changes, the rules change with it. The skill never stops growing.
+You:    Accept.
+```
 
-## How the system is structured
+Nothing reaches a lesson file until you accept or edit the draft.
 
-Two layers:
+## Install
 
-- **The meta-skill (`self-improvement`)** is the engine. It's generic — it doesn't care what subject you're working on. It only knows how to capture lessons, store them, and promote the recurring ones into permanent rules.
-- **Domain skills** are the playbooks for specific kinds of work. Each one is its own folder under `skills/`, with its own `SKILL.md` and its own `.learnings/` files. The meta-skill drives all of them.
+**Claude Code** (2.1.275 or later):
 
-You can have as many domain skills as you want. The meta-skill works for all of them at once.
+```
+/plugin install studio-skills --marketplace NAJEMWEHBE/studio-skills
+```
 
-## Quickstart (claude.ai desktop app)
+On older versions, run `/plugin marketplace add NAJEMWEHBE/studio-skills`, then `/plugin install studio-skills@studio-skills`.
 
-This is for non-developers using [claude.ai](https://claude.ai) — not Claude Code or the API.
+Then, in a project, ask Claude to *"start a lesson log for live-streaming"* (or any domain). It creates `.learnings/live-streaming/` from the templates. The `self-improvement` skill only runs in projects that have a `.learnings/` folder, so other projects are untouched.
 
-1. **Create a Project** in claude.ai for the domain you want to work on.
-2. **Upload these files** as Project knowledge:
-   - `skills/self-improvement/SKILL.md` — the meta-skill that runs the learning loop
-   - `skills/<your-domain>/SKILL.md` — the playbook for whatever you're working on
-   - The `.learnings/` folder for that domain
-   - Any `references/` and `examples/` files for that domain
-3. **Set the Project's custom instructions** to invoke the self-improvement skill at the start of every session.
-4. **Work normally.** When Claude proposes a new lesson, you accept, edit, or reject it.
-5. **At session end**, copy the updated `.learnings/` files out of Claude and commit them back to GitHub via the web UI.
+**claude.ai:** upload each skill as a zip, and keep the lesson files in a Project. Step by step: [`docs/how-to-use-in-claude-ai.md`](docs/how-to-use-in-claude-ai.md).
 
-Full step-by-step guide: [`docs/how-to-use-in-claude-ai.md`](docs/how-to-use-in-claude-ai.md)
+## Where lessons live
 
-## Available skills
+Lessons belong to you, not to the installed skill, which an update replaces:
 
-| Skill | Purpose |
+- **Claude Code:** `.learnings/<domain>/` in your project, with `LEARNINGS.md`, `ERRORS.md`, `FEATURE_REQUESTS.md` and `RULES.md`. Real values that must not be shared (server URLs, venue notes) go in `.learnings/private/*.local.md`; add `**/.learnings/private/` to your `.gitignore`. Ask Claude for a log across all projects and it uses the plugin's data folder instead.
+- **claude.ai:** the same four files in the Project's knowledge. Claude prints each updated file in full for you to save over the old one.
+
+[`examples/.learnings/live-streaming/`](examples/.learnings/live-streaming/) shows the layout.
+
+## Skills
+
+| Skill | What it does |
 |---|---|
-| `self-improvement` | **Meta-skill.** Runs the learn / adapt / evolve loop. Domain-agnostic — works for anything. |
-| `live-streaming` | **First concrete example.** Live streaming operations using bonded uplinks and SRT/RTMP relay servers. |
+| `self-improvement` | The engine: reads a domain's lessons before work (PREP), notes signals during it (DO), drafts lessons and promotions for your approval at the end (REFLECT). Works for any domain. |
+| `live-streaming` | An example domain: OBS over a bonded cellular router to an SRT/RTMP relay, with a pre-show checklist, live rules and failure modes. |
 
-## What kind of skills can you add?
+Any work you repeat can be a domain: marketing campaigns, video editing, filming, podcast production, building and debugging. To add one: [`docs/how-to-add-a-new-domain.md`](docs/how-to-add-a-new-domain.md).
 
-Anything you do more than once. Some examples:
+## Checks
 
-- **Marketing** — campaign planning, audience research, brand voice rules, content review
-- **Video editing** — ingest workflow, color grading rules, export presets, timeline conventions
-- **Filming** — pre-production checklists, shot lists, on-set protocols, gear setups
-- **Problem-solving** — debugging workflows, troubleshooting decision trees, diagnostic checklists
-- **Building** — recurring setup procedures, configuration patterns, deployment steps
-- **Writing** — drafting workflows, review checklists, style rules
-- **Anything else** — if you've ever thought *"I keep making the same mistake here,"* it's a candidate
-
-Each new domain becomes its own folder under `skills/`. Use [`docs/how-to-add-a-new-domain.md`](docs/how-to-add-a-new-domain.md) for the walkthrough.
-
-## Repository structure
-
-```
-studio-skills/
-├── README.md                    (you are here)
-├── LICENSE                      (MIT)
-├── CONTRIBUTING.md              (how to add skills, submit lessons)
-├── .gitignore                   (blocks private/secret files)
-├── docs/                        (usage guides for claude.ai users)
-└── skills/
-    ├── self-improvement/        (the engine — domain-agnostic)
-    └── live-streaming/          (first example domain)
-```
-
-## Adding your own domain
-
-This system is designed to be forked or extended. If you want a skill for your own work — anything from photography to podcasts to plumbing — see [`docs/how-to-add-a-new-domain.md`](docs/how-to-add-a-new-domain.md).
+- CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) checks each skill's frontmatter, that no file under `.learnings/private/` is tracked, local markdown links, that the skill zips build, and runs `claude plugin validate . --strict`.
+- [`evals/`](evals/) holds `claude plugin eval` cases for both skills. They are not run in CI: each run uses plan usage. Run them from the repo root with `claude plugin eval . --scaffold --allow-tools Write Edit`: `--scaffold` lets the recurrence case create its starting lesson file, and the self-improvement cases need Write and Edit so they can show that nothing is written before you accept.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT, see [`LICENSE`](LICENSE).
 
 ## Status
 
-**Experimental.** This is v1. The patterns work, but the documentation is still settling. Issues and pull requests welcome.
+**Experimental.** The loop works; the documentation is still settling. Issues and pull requests welcome. Publishing your own fork: [`PUBLISHING.md`](PUBLISHING.md).

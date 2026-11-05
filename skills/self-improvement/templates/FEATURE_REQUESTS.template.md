@@ -1,35 +1,33 @@
-# FEATURE_REQUESTS — &lt;domain name&gt;
+# FEATURE_REQUESTS: [domain]
 
-Capabilities the user wanted but Claude couldn't deliver. Use these to track gaps in the system that might justify new tooling, new skills, or new manual workflows.
-
-**This file is empty until the first request is logged.** Requests are logged during sessions via the `self-improvement` skill — never silently. The user must accept, edit, or reject every entry.
+Capabilities the user wanted that Claude couldn't deliver, in the lesson format of the `self-improvement` skill, with the `FR-` prefix. They show where new tools, skills or manual workflows would pay off. Every entry is added through that skill, after the user accepts its draft.
 
 ---
 
 <!--
-First entry goes here. Use the format:
+Entry format:
 
-## [FR-YYYYMMDD-XXX] category
+## [FR-YYYYMMDD-XXX] [domain].[topic].[aspect]
 
 **Logged**: ISO-8601 timestamp
 **Priority**: low | medium | high | critical
-**Status**: pending | active | implemented | wont_fix | archived
-**Area**: <domain>
+**Status**: active | implemented | wont_fix | archived
+**Area**: [domain]
 
 ### Summary
-What the user wanted in one line.
+What the user wanted, in one line.
 
 ### Details
-The full request. Why the user wanted it. What Claude could/couldn't do.
+The full request, why the user wanted it, and what Claude could and couldn't do.
 
 ### Suggested Action
-What would need to exist for this to work. Possibly: a new skill, a new tool, a new sub-skill, or a manual workaround.
+What would need to exist: a new skill, a tool, or a manual workaround.
 
 ### Metadata
 - Source: user_feedback
-- Pattern-Key: <domain>.<topic>.<aspect>
+- Pattern-Key: [domain].[topic].[aspect]
 - Recurrence-Count: 1
 - First-Seen: YYYY-MM-DD
 - Last-Seen: YYYY-MM-DD
-- See Also: <related LRN- or FR- IDs>
+- See Also: [related entry IDs]
 -->

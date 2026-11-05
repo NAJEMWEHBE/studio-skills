@@ -1,102 +1,46 @@
 ---
 name: live-streaming
-description: Live streaming operations using a bonding router and SRT/RTMP relay servers. Use when configuring OBS, planning a stream, troubleshooting bitrate/jitter issues, deciding which uplink combination to use, or briefing a client on streaming constraints. Also use before any live event involving streaming setup.
+description: Live-stream engineering for OBS over a bonded cellular router to an SRT/RTMP relay. Use when setting up OBS for a stream, running the pre-show check before a live event, fixing dropped frames, jitter or disconnects mid-stream, choosing which uplinks to bond, or briefing a client on what the stream can deliver.
 ---
 
 # live-streaming
 
-> **This is an example domain skill** included with the public template of `studio-skills`. The structure is real and reusable; the specifics (hardware names, relay regions, bitrate caps) are illustrative. Adapt to your own equipment and workflow.
+An example domain skill: the structure is real, the numbers are illustrative. The path is OBS → bonding router (several SIMs, optionally Ethernet or Wi-Fi, bonded into one uplink) → primary relay, with a fallback relay → CDN.
 
-The first concrete domain skill in this collection. Covers live streaming operations using a bonding router (e.g. cellular bonding hardware that combines multiple SIMs into a single uplink) to a hosted SRT/RTMP relay server, with OBS as the encoder.
-
-## When to invoke this skill
-
-- Configuring OBS for a stream
-- Planning a live event involving streaming
-- Troubleshooting bitrate, jitter, or connection issues mid-stream
-- Deciding which uplink combination to use for a bonded connection
-- Briefing a client on streaming capabilities and constraints
-- Reviewing past lessons in `.learnings/` before any major streaming event
-
-## Hardware stack (example)
-
-- **Encoder:** OBS Studio running on a workstation
-- **Bonding router:** A cellular bonding device that accepts multiple SIM cards (and optional Ethernet/Wi-Fi), bonds them into a single uplink
-- **Relay server:** A cloud-hosted SRT/RTMP receiver — primary plus fallback for redundancy
-- **CDN:** Vimeo, YouTube, or custom RTMP target depending on event
-- **Network path:** OBS → bonding router → bonded uplink → relay → CDN
-
-Real IPs, hostnames, ports, credentials, and stream keys live in `.learnings/private/` (gitignored). Never in this file.
+Before a live event, run the `self-improvement` skill's PREP for the `live-streaming` domain: its rules and lessons hold this setup's measured values (bitrate cap, uplinks that work at each venue) and override the defaults here. Real server URLs, stream keys and IPs live only in the project's `.learnings/private/` notes.
 
 ## Pre-stream checklist
 
-Run through this list before any live event. Order matters.
+Work through it in order, at least 30 minutes before showtime. Done when step 10's trial stream has run 5 minutes clean.
 
-1. **Verify relay server is responsive.** Test with low-bitrate stream 30+ minutes before showtime.
-2. **Confirm uplink card status.** All active SIMs/uplinks are paid up, signal-checked, and not blocked.
-3. **Set OBS bitrate to the relay's reliable cap.** See `references/server-routing.md`.
-4. **Set OBS encoder to CBR.** Variable bitrate causes jitter on bonded uplinks.
-5. **Set keyframe interval to 2 seconds.** Required by most CDN ingest endpoints.
-6. **Enable auto-reconnect in OBS.** Connection drops are not a question of *if* but *when*.
-7. **Verify NO video calls** (Zoom, Teams, Meet) are routed through the bonding router. They will starve the stream.
-8. **Confirm fallback relay is reachable.** If primary fails, you switch in seconds, not minutes.
-9. **Check CDN content rating / age gate** — silently blocks some regions if mis-set.
-10. **Run a 5-minute trial stream end-to-end.** Validate everything actually works before the audience arrives.
+1. **Relay responds.** Send a low-bitrate test stream to the primary relay.
+2. **Uplinks ready.** Every SIM is paid up, has signal at the venue, and isn't blocked. See `references/bonding-router-rules.md`.
+3. **Bitrate set to the relay's reliable cap.** Use the measured cap from the domain's rules or lessons; with none recorded, measure it with the method in `references/server-routing.md`.
+4. **Encoder set as in `examples/obs-config-example.md`:** hardware encoder where there is one, CBR.
+5. **Keyframe interval 2 seconds.** YouTube recommends it and Twitch requires it.
+6. **Automatic reconnect on**, as in `examples/obs-config-example.md`.
+7. **Nothing else on the bonded network:** no video calls (Zoom, Teams, Meet) and no uploads. They starve the stream.
+8. **Fallback relay reachable.** Switching to it should take seconds: keep its server URL ready in OBS.
+9. **CDN event settings checked:** privacy, geo-restriction and age restriction match what the client expects.
+10. **5-minute trial stream end to end,** watched on the CDN as a viewer would.
 
-## Real-time monitoring rules
+## While live
 
-While the stream is live:
+- **Dropped frames above 1% sustained:** lower the bitrate at once.
+- **Router dashboard:** a SIM falling to 2G can drag the bonded total down; disable it (`references/bonding-router-rules.md`).
+- **Change only what the trial stream tested.** Experiments wait for the next trial.
+- **A "be right back" scene stays ready** for a drop and reconnect.
+- **Lessons wait for the break.** Note what happened; the `self-improvement` skill's REFLECT drafts it after the event. If a credential is exposed mid-stream, tell the user at once.
 
-- **Watch the OBS dropped-frames counter.** Above 1% sustained = lower bitrate immediately.
-- **Watch the bonding router dashboard for uplink degradation.** A SIM dropping to 2G can take down the bonded total.
-- **Don't tune anything mid-stream that you didn't tune in the trial.** No experiments live.
-- **Keep a fallback OBS scene ready** with a static "we'll be right back" card in case you need to drop and reconnect.
-
-## Failure-mode quick reference
+## Failure modes
 
 | Symptom | Likely cause | Action |
 |---|---|---|
-| Dropped frames climbing | Bitrate too high for current relay capacity | Lower bitrate to your relay's reliable cap |
-| Stream connects then disconnects after a few minutes | Jitter on a specific uplink | Check bonding router dashboard, drop the offending uplink |
-| Stream connects but viewers see freezes | CDN-side issue or keyframe-interval mismatch | Confirm 2s keyframe; check CDN status page |
-| Some regions can't watch | CDN content rating not set correctly | Set rating before publishing |
-| Audio drift accumulating | Encoder clock vs CDN clock drift | Reset stream every ~3 hours for long events |
-| All uplinks show signal but bonded throughput is low | Carrier throttling, OR an uplink has degraded | Disable suspect uplink; re-enable after testing |
+| Dropped frames climbing | Bitrate above what the uplink and relay can carry | Lower the bitrate to the reliable cap |
+| Connects, then disconnects after a few minutes | Jitter on one uplink | Find it in the router dashboard and disable it |
+| Viewers see freezes | Keyframe interval mismatch, or a CDN-side problem | Confirm the 2 s keyframe; check the CDN's status page |
+| Some viewers can't watch | CDN privacy, geo-restriction or age setting | Check those settings for the event |
+| Audio drifts out of sync | Mixed sample rates, or a capture device's clock | Set every source and OBS to 48 kHz; check the capture device |
+| Every uplink shows signal, bonded throughput is low | Carrier throttling, or one degraded uplink | Disable the suspect uplink; re-enable it after testing |
 
-## Where the rules live
-
-This `SKILL.md` carries the **stable, well-earned rules** — content that was promoted from the lesson library after recurring patterns were observed.
-
-The **active lesson library** is in `.learnings/`:
-
-- `.learnings/LEARNINGS.md` — corrections, knowledge gaps, best practices
-- `.learnings/ERRORS.md` — command/tool/API failures
-- `.learnings/FEATURE_REQUESTS.md` — capabilities that don't exist yet
-
-Read `.learnings/` before any major event. New lessons get added there during sessions; once they hit the promotion threshold (see `skills/self-improvement/references/promotion-criteria.md`), they graduate into this `SKILL.md`.
-
-## How to add a new lesson during a stream
-
-When something happens worth logging during a live event:
-
-1. **Stop the stream first if needed** — the lesson can wait, the audience can't.
-2. **At the next break or after the event ends**, the `self-improvement` skill's REFLECT phase will ask you about it.
-3. **Don't try to log mid-stream.** It's distracting and the lesson will be lower-quality.
-
-For the rare case where a critical safety issue surfaces mid-stream (e.g. you discover a credential is exposed), stop and ask the user what to do — don't log silently.
-
-## File map
-
-```
-skills/live-streaming/
-├── SKILL.md                      (this file)
-├── .learnings/
-│   ├── LEARNINGS.md              (active lesson library)
-│   ├── ERRORS.md                 (active error library)
-│   └── FEATURE_REQUESTS.md       (active feature request library)
-├── examples/
-│   └── obs-config-example.md     (annotated working OBS config)
-└── references/
-    ├── m4-mini-rules.md          (generic do/don't list for the bonding router)
-    └── server-routing.md         (relay architecture concept)
-```
+The "can't watch" and "audio drifts" rows are rules of thumb, not measured with this setup: record what you find as a lesson when either happens.
