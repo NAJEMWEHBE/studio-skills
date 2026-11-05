@@ -64,7 +64,7 @@ Any work you repeat can be a domain: marketing campaigns, video editing, filming
 
 ## Checks
 
-- CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) checks each skill's frontmatter, that no file under `.learnings/private/` is tracked, local markdown links, and that the skill zips build.
+- CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) checks each skill's frontmatter, that no file under `.learnings/private/` is tracked, local markdown links, that the skill zips build, and runs `claude plugin validate . --strict`.
 - [`evals/`](evals/) holds `claude plugin eval` cases for both skills. They are not run in CI: each run uses plan usage. Run them from the repo root with `claude plugin eval . --scaffold --allow-tools Write Edit`: `--scaffold` lets the recurrence case create its starting lesson file, and the self-improvement cases need Write and Edit so they can show that nothing is written before you accept.
 
 ## License

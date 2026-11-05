@@ -35,8 +35,6 @@ jobs:
           name: skill-zips
           path: dist/*.zip
 
-      # Whether the validator runs without signing in is not confirmed, so this step
-      # reports but never fails the build. Run `claude plugin validate . --strict` locally.
-      - name: Plugin validate (informational)
-        continue-on-error: true
+      # Runs without signing in (checked on this repo's first CI run).
+      - name: Plugin validate
         run: npx --yes @anthropic-ai/claude-code plugin validate . --strict
