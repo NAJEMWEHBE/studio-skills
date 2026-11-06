@@ -1,7 +1,7 @@
 // Repo checks, run in CI and locally: node scripts/check.mjs
 // 1. Every skills/<folder>/SKILL.md has valid frontmatter: `name` is kebab-case, at most
 //    64 characters and equal to the folder; `description` is 1-1024 characters without < or >.
-// 2. No tracked file sits under a .learnings/private/ folder.
+// 2. No tracked file sits under a .learnings/private/ folder (any letter case, any file name).
 // 3. Every relative link in a tracked markdown file points to a file or folder that exists.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -32,9 +32,11 @@ for (const folder of readdirSync(skillsDir, { withFileTypes: true }).filter(d =>
 }
 
 // 2. Private lesson notes
-const tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean);
+// -z gives raw NUL-separated paths. Without it git wraps paths that hold non-ASCII
+// characters, quotes or backslashes in double quotes, and the check below would miss them.
+const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
 for (const path of tracked) {
-  if (/(^|\/)\.learnings\/private\//.test(path)) errors.push(`${path}: private lesson notes are tracked`);
+  if (/(^|\/)\.learnings\/private(\/|$)/i.test(path)) errors.push(`${path}: private lesson notes are tracked`);
 }
 
 // 3. Relative markdown links
