@@ -6,13 +6,15 @@ Paths below are relative to the domain folder in the lessons root (`.learnings/<
 
 ## Promotion triggers
 
-A LEARNINGS entry is **eligible** for promotion when any one of these holds:
+An `active` LEARNINGS entry is **eligible** for promotion when any one of these holds:
 
 1. `Recurrence-Count` is 3 or more.
 2. `Priority` is `high` or `critical`, even on first occurrence.
 3. It applies to more than one workflow in the domain (the user confirms which).
 
 Check the triggers in REFLECT, every time an entry is drafted or its count goes up. When one holds, put the promotion proposal in the same draft: *"Bump LRN-20260115-001 to Recurrence 3, which makes it eligible: promote it to RULES.md as '...'? Accept / edit / reject."* The user can decline; the entry then stays `active` and is proposed again only when its count rises.
+
+An entry already `promoted` is not proposed again: its rule is in `RULES.md` (or its skill exists), so a recurrence only bumps `Recurrence-Count` and `Last-Seen`.
 
 ## Promote or extract
 
