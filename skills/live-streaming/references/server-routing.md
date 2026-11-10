@@ -22,11 +22,21 @@ The reliable cap is the highest bitrate the path sustains without drops. It depe
 
 1. Start a trial stream to the relay (not to the public CDN event) at a bitrate you know is safe, such as 2000 kbps.
 2. Every 5 minutes, raise the bitrate by 500 kbps.
-3. Stop when OBS's dropped frames pass 0.5% over a 5-minute step. The last step below that is the ceiling.
+3. Stop at the first 5-minute step that shows congestion (see [Which congestion signal to read](#which-congestion-signal-to-read)). The last step below that is the ceiling.
 4. Set the stream to 80% of the ceiling; that is the reliable cap.
 5. Record it as a lesson (Pattern-Key `live-streaming.bitrate.cap`), with the venue, the relay and the uplink mix as placeholders.
 
 The step size, threshold and 80% margin are a starting method, not measured values: tighten them as lessons accumulate.
+
+## Which congestion signal to read
+
+OBS's dropped-frames counter depends on the protocol:
+
+- **RTMP:** OBS drops frames when the network falls behind and counts them. Congestion is dropped frames above 0.5% over a 5-minute step.
+- **SRT:** the counter always reads 0 and the congestion square in the status bar stays green, however bad the network is. OBS's SRT output does not report either value; it queues what the network can't take, so the stream falls further behind instead. Read these instead:
+  - **The relay's SRT statistics** (the main signal): congestion is packets dropped as too late to play, or lost and retransmitted packets that climb step after step.
+  - **The OBS status bar:** the kb/s shown stays below the set bitrate, or OBS reconnects.
+  - **The relay's view:** the delay behind live keeps growing.
 
 ## Latency
 
@@ -44,7 +54,7 @@ Glass to glass, expect 10 to 30 seconds. These are typical ranges, not measureme
 | Capture device | USB or cable disconnect | OBS shows no signal on that source |
 | OBS | Encoder overload | OBS status bar or log: encoding overloaded |
 | Bonding router | Uplink degradation | Router dashboard |
-| Bonded uplink | Throughput collapse | OBS dropped frames spike |
+| Bonded uplink | Throughput collapse | RTMP: OBS dropped frames spike. SRT: the relay's dropped and retransmitted packets climb; OBS's kb/s may also fall below the set bitrate |
 | Relay | Connection refused | OBS reports the stream disconnected |
 | CDN | Ingest failure | CDN dashboard or an external monitor |
 | Viewer | Privacy, geo-restriction or age setting | Viewer reports; no error in OBS or the CDN |
