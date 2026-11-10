@@ -1,17 +1,24 @@
 name: Release skill zips
 
 # Runs only when a version tag is pushed (for example v0.2.0): attaches one zip per
-# skill to the GitHub release, for claude.ai users to upload.
+# skill to the GitHub release, for claude.ai users to upload. The CI checks run
+# first, from ci.yml itself, and the release waits for them to pass.
 on:
   push:
     tags: ['v*']
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
   release:
+    needs: checks
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Build skill zips
