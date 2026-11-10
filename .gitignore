@@ -3,8 +3,8 @@
 *.local.md
 secrets/
 *.env
-*.env.local
-*.env.*.local
+*.env.*
+!*.env.example
 
 # Credentials and tokens
 *.pem
