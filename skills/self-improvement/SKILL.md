@@ -53,7 +53,7 @@ For each note in the session log:
    - **New key:** draft a new entry in the lesson format (`references/lesson-format.md`), with `Status: active` and `Recurrence-Count: 1`.
    - **Existing key:** draft the change to that entry instead: `Recurrence-Count` up by one, `Last-Seen` today.
    - **Contradicts a rule:** say so and follow "Conflict and demotion" in `references/lesson-lifecycle.md`.
-2. Check the promotion triggers in `references/lesson-lifecycle.md`. When one holds, add the promotion proposal to the same draft.
+2. For an `active` entry, check the promotion triggers in `references/lesson-lifecycle.md`. When one holds, add the promotion proposal to the same draft. An entry already `promoted` gets only the bump.
 3. Show the drafts and ask accept / edit / reject for each.
 4. Write what the user accepted, with their edits.
 
