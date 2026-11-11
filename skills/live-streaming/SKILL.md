@@ -26,7 +26,7 @@ Work through it in order, at least 30 minutes before showtime. Done when step 10
 
 ## While live
 
-- **Congestion sustained:** lower the bitrate at once. On RTMP that is OBS's dropped frames above 1%. On SRT, OBS's dropped frames always read 0: watch the relay's SRT statistics (dropped and retransmitted packets climbing); OBS's kb/s may also fall below the set bitrate (`references/server-routing.md`).
+- **Congestion sustained:** lower the bitrate at once. On RTMP that is OBS's dropped frames above 1%. On SRT, OBS's dropped frames always read 0: watch the relay's SRT statistics (packets dropped as too late, or the retransmitted share rising); OBS's kb/s may also fall below the set bitrate (`references/server-routing.md`).
 - **Router dashboard:** a SIM falling to 2G can drag the bonded total down; disable it (`references/bonding-router-rules.md`).
 - **Change only what the trial stream tested.** Experiments wait for the next trial.
 - **A "be right back" scene stays ready** for a drop and reconnect.
@@ -36,7 +36,7 @@ Work through it in order, at least 30 minutes before showtime. Done when step 10
 
 | Symptom | Likely cause | Action |
 |---|---|---|
-| Dropped frames climbing (RTMP); on SRT, the relay's dropped or retransmitted packets climbing, or OBS's kb/s below the set bitrate | Bitrate above what the uplink and relay can carry | Lower the bitrate to the reliable cap |
+| Dropped frames climbing (RTMP); on SRT, the relay dropping packets or its retransmitted share rising, or OBS's kb/s below the set bitrate | Bitrate above what the uplink and relay can carry | Lower the bitrate to the reliable cap; already at it, to 80% of the current bitrate |
 | Connects, then disconnects after a few minutes | Jitter on one uplink | Find it in the router dashboard and disable it |
 | Viewers see freezes | Keyframe interval mismatch, or a CDN-side problem | Confirm the 2 s keyframe; check the CDN's status page |
 | Some viewers can't watch | CDN privacy, geo-restriction or age setting | Check those settings for the event |
