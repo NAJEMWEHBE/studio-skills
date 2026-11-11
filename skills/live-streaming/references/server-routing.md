@@ -36,7 +36,7 @@ OBS's dropped-frames counter depends on the protocol:
 
 - **RTMP:** OBS drops frames when the network falls behind and counts them. Congestion is dropped frames above 0.5% over a 5-minute step.
 - **SRT:** the counter always reads 0 and the congestion square in the status bar stays green, however bad the network is. OBS's SRT output does not report either value; it queues what the network can't take, so the stream falls further behind instead. Read these instead:
-  - **The relay's SRT statistics** (the main signal): congestion is any packet dropped as too late to play, or a share of lost and retransmitted packets that rises from one step to the next. The counters are running totals, so they climb on a healthy path too: compare what each step added, as a share of the packets sent in it. A steady share that SRT recovers is normal on cellular.
+  - **The relay's SRT statistics** (the main signal): congestion is any packet dropped as too late to play, or a share of lost and retransmitted packets that rises from one step to the next. The counters are running totals, so they climb on a healthy path too: compare what each step added, as a share of the packets the relay received in it. A steady share that SRT recovers is normal on cellular.
   - **The OBS status bar:** the kb/s shown stays below the set bitrate, or OBS reconnects.
   - **The relay's view:** the delay behind live keeps growing.
 
